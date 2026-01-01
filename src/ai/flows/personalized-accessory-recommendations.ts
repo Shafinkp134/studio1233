@@ -68,13 +68,19 @@ const personalizedRecommendationsFlow = ai.defineFlow(
     outputSchema: PersonalizedRecommendationsOutputSchema,
   },
   async input => {
-    const llmResponse = await personalizedRecommendationsPrompt(input);
-    const toolRequest = llmResponse.toolRequest();
-    if (toolRequest) {
-      const toolResponse = await toolRequest.run();
-      const finalResponse = await llmResponse.send(toolResponse);
-      return finalResponse.output!;
+    try {
+      const llmResponse = await personalizedRecommendationsPrompt(input);
+      const toolRequest = llmResponse.toolRequest();
+      if (toolRequest) {
+        const toolResponse = await toolRequest.run();
+        const finalResponse = await llmResponse.send(toolResponse);
+        return finalResponse.output!;
+      }
+      return llmResponse.output!;
+    } catch (error) {
+      console.error("Error in personalizedRecommendationsFlow:", error);
+      // Return an empty list of recommendations on error to allow graceful fallback.
+      return { recommendedProducts: [] };
     }
-    return llmResponse.output!;
   }
 );
