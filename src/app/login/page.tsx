@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithPopup, GoogleAuthProvider, AuthErrorCodes } from "firebase/auth";
 import { useAuth, useUser } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,11 +50,19 @@ export default function LoginPage() {
         });
       }
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: error.message || "An unexpected error occurred.",
-      });
+      if (error.code === AuthErrorCodes.UNAUTHORIZED_DOMAIN) {
+         toast({
+          variant: "destructive",
+          title: "Login Failed: Unauthorized Domain",
+          description: "This domain is not authorized for login. Please add it to the authorized domains in your Firebase console.",
+        });
+      } else {
+        toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: error.message || "An unexpected error occurred.",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
