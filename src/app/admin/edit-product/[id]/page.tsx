@@ -124,4 +124,67 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                     <FormLabel>Price (₹)</FormLabel>
                     <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
                     <FormMessage />
-                  </Ite
+                  </FormItem>
+                )}/>
+                 <FormField control={form.control} name="image" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Image ID</FormLabel>
+                        <FormControl><Input placeholder="e.g., case-iphone-15" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}/>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FormField control={form.control} name="brand" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Brand</FormLabel>
+                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a brand" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="Apple">Apple</SelectItem>
+                            <SelectItem value="Samsung">Samsung</SelectItem>
+                            <SelectItem value="Anker">Anker</SelectItem>
+                            <SelectItem value="Generic">Generic</SelectItem>
+                            <SelectItem value="Nothing">Nothing</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}/>
+                <FormField control={form.control} name="type" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a product type" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="Case">Case</SelectItem>
+                            <SelectItem value="Charger">Charger</SelectItem>
+                            <SelectItem value="Cable">Cable</SelectItem>
+                            <SelectItem value="Screen Protector">Screen Protector</SelectItem>
+                             <SelectItem value="Phone">Phone</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}/>
+              </div>
+              
+              <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                {isSubmitting ? "Updating Product..." : "Update Product"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
