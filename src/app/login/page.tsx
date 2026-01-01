@@ -14,7 +14,7 @@ import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 
 const phoneSchema = z.object({
-  phone: z.string().regex(/^\+[1-9]\d{1,14}$/, "Please enter a valid phone number with country code (e.g., +15551234567)."),
+  phone: z.string().regex(/^\+[1-9]\d{1,14}$/, "Please enter a valid phone number with country code (e.g., +919876543210)."),
 });
 
 const otpSchema = z.object({
@@ -33,7 +33,7 @@ export default function LoginPage() {
 
   const phoneForm = useForm<z.infer<typeof phoneSchema>>({
     resolver: zodResolver(phoneSchema),
-    defaultValues: { phone: "" },
+    defaultValues: { phone: "+91" },
   });
 
   const otpForm = useForm<z.infer<typeof otpSchema>>({
@@ -129,7 +129,7 @@ export default function LoginPage() {
                                     <FormItem>
                                         <FormLabel>Phone Number</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="+1 555 123 4567" {...field} />
+                                            <Input placeholder="+91 987 654 3210" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
