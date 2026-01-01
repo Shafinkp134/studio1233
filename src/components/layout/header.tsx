@@ -11,7 +11,7 @@ import { getAuth, signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
 
-const ADMIN_EMAIL = "admin@example.com";
+const ADMIN_EMAIL = "shafinkp444@gmail.com";
 
 export function Header() {
   const { user, loading } = useUser();

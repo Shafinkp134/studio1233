@@ -30,7 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // For now, we'll hardcode the admin user. In a real app, this would come from a database.
-const ADMIN_EMAIL = "admin@example.com";
+const ADMIN_EMAIL = "shafinkp444@gmail.com";
 
 export default function AdminPage() {
   const { user, loading } = useUser();
