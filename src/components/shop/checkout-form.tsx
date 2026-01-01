@@ -16,6 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/context/cart-context";
 import { useFirestore, useUser } from "@/firebase";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
@@ -65,38 +67,46 @@ export function CheckoutForm() {
         
         setIsSubmitting(true);
 
-        try {
-            const ordersCollection = collection(firestore, "orders");
-            await addDoc(ordersCollection, {
-                ...values,
-                date: new Date().toISOString(),
-                status: 'Processing',
-                total: cartTotal,
-                items: cartItems.map(item => ({
-                    productId: item.product.id,
-                    productName: item.product.name,
-                    quantity: item.quantity,
-                    price: item.product.price,
-                })),
-            });
-            
-            toast({
-                title: "Order Placed!",
-                description: "We have received your order. Please send the payment to 8590814673 via your preferred payment app.",
-            });
+        const orderData = {
+            ...values,
+            date: new Date().toISOString(),
+            status: 'Processing',
+            total: cartTotal,
+            items: cartItems.map(item => ({
+                productId: item.product.id,
+                productName: item.product.name,
+                quantity: item.quantity,
+                price: item.product.price,
+            })),
+        };
 
-            clearCart();
-            router.push('/');
+        const ordersCollection = collection(firestore, "orders");
+        addDoc(ordersCollection, orderData)
+            .then(() => {
+                toast({
+                    title: "Order Placed!",
+                    description: "We have received your order. Please send the payment to 8590814673 via your preferred payment app.",
+                });
+                clearCart();
+                router.push('/');
+            })
+            .catch(async (serverError) => {
+                 const permissionError = new FirestorePermissionError({
+                    path: ordersCollection.path,
+                    operation: 'create',
+                    requestResourceData: orderData
+                });
+                errorEmitter.emit('permission-error', permissionError);
 
-        } catch (error: any) {
-            toast({
-                variant: "destructive",
-                title: "Error placing order",
-                description: error.message || "Could not place the order.",
+                toast({
+                    variant: "destructive",
+                    title: "Error placing order",
+                    description: "Could not place the order. Check console for details.",
+                });
+            })
+            .finally(() => {
+                setIsSubmitting(false);
             });
-        } finally {
-            setIsSubmitting(false);
-        }
     }
 
 
