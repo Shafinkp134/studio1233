@@ -35,39 +35,21 @@ export async function POST(request: Request) {
 
     const fileBuffer = await streamToBuffer(file.stream());
     
-    const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: 'payments' },
-      (error, result) => {
-        if (error) {
-          // This part of the callback is tricky with Promises, we'll handle errors in the promise chain
-          return;
-        }
-      }
-    );
-
     const uploadPromise = new Promise((resolve, reject) => {
-        const stream = Readable.from(fileBuffer);
-        stream.pipe(uploadStream)
-            .on('finish', () => resolve(uploadStream.end()))
-            .on('error', reject);
-    })
-    .then((result: any) => {
-        // The structure of the result from upload_stream is a bit different when using promises
-        // We look for the result that `uploadStream.end()` resolves with.
-        // A more robust way is to check the result object from the callback if you can promisify it correctly.
-        // For simplicity, let's find the URL from the response that Cloudinary's Node SDK gives us.
-        // This is a simplified approach. In a production scenario, you might need a more robust way to get the result.
-        // A common pattern is to wrap the callback style in a promise.
-        return new Promise((res, rej) => {
-             const streamUpload = cloudinary.uploader.upload_stream({folder: "payments"}, (error, result) => {
-                if(result) {
-                    res(result)
+        const streamUpload = cloudinary.uploader.upload_stream(
+            { 
+                folder: "payments",
+                upload_preset: "ml_default" 
+            }, 
+            (error, result) => {
+                if (result) {
+                    resolve(result);
                 } else {
-                    rej(error)
+                    reject(error);
                 }
-             })
-             Readable.from(fileBuffer).pipe(streamUpload)
-        })
+            }
+        );
+        Readable.from(fileBuffer).pipe(streamUpload);
     });
     
     const result: any = await uploadPromise;
