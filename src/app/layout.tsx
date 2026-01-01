@@ -8,7 +8,7 @@ import { Footer } from '@/components/layout/footer';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'AccessoryAce',
+  title: 'MrShopiy',
   description: 'The best accessories for your mobile devices.',
 };
 
