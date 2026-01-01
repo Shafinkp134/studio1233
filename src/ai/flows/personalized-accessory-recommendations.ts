@@ -13,8 +13,8 @@ import {z} from 'genkit';
 
 const PersonalizedRecommendationsInputSchema = z.object({
   userId: z.string().describe('The ID of the user.'),
-  browsingHistory: z.array(z.string()).describe('The user\'s browsing history (list of product IDs).'),
-  purchaseHistory: z.array(z.string()).describe('The user\'s purchase history (list of product IDs).'),
+  browsingHistory: z.array(z.string()).describe("The user's browsing history (list of product IDs)."),
+  purchaseHistory: z.array(z.string()).describe("The user's purchase history (list of product IDs)."),
   userCharacteristics: z.string().describe('characteristics of the user'),
 });
 export type PersonalizedRecommendationsInput = z.infer<typeof PersonalizedRecommendationsInputSchema>;
@@ -36,16 +36,14 @@ const productSuggestionTool = ai.defineTool({
     inputSchema: z.object({
       userCharacteristics: z.string().describe('The characteristics of the current user.'),
     }),
-    outputSchema: z.array(z.string()).describe('list of product IDs for the current user'),
+    outputSchema: z.object({
+        recommendedProducts: z.array(z.string()).describe('list of product IDs for the current user')
+    }),
   },
   async (input) => {
-    const {
-      userCharacteristics,
-    } = input
-    // TODO: Implement tool to query database or external service for product recommendations.
-    // This is a placeholder; replace with actual implementation.
-    console.log("User characteristics in tool: " + userCharacteristics)
-    return ['product123', 'product456', 'product789'];
+    // This is a placeholder; replace with actual implementation to query a database or external service.
+    console.log("User characteristics in tool: " + input.userCharacteristics);
+    return { recommendedProducts: ['product123', 'product456', 'product789', 'case-iphone-15', 'charger-anker-pd']};
   }
 );
 
@@ -59,7 +57,7 @@ const personalizedRecommendationsPrompt = ai.definePrompt({
 
   Consider what accessories would complement their previous purchases and browsing activity.
   Use the productSuggestionTool tool to find the recommended products.
-  Return a JSON array of product IDs.
+  Your final output should be a JSON object with a "recommendedProducts" key containing an array of product IDs.
   `,
 });
 
@@ -70,10 +68,13 @@ const personalizedRecommendationsFlow = ai.defineFlow(
     outputSchema: PersonalizedRecommendationsOutputSchema,
   },
   async input => {
-    const {output} = await personalizedRecommendationsPrompt(input);
-    return output!;
+    const llmResponse = await personalizedRecommendationsPrompt(input);
+    const toolRequest = llmResponse.toolRequest();
+    if (toolRequest) {
+      const toolResponse = await toolRequest.run();
+      const finalResponse = await llmResponse.send(toolResponse);
+      return finalResponse.output!;
+    }
+    return llmResponse.output!;
   }
 );
-
-
-
