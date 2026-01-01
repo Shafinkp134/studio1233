@@ -30,6 +30,7 @@ export async function POST(request: Request) {
     }
 
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      console.error('Cloudinary environment variables are not configured.');
       return NextResponse.json({ error: 'Cloudinary environment variables are not configured.' }, { status: 500 });
     }
 
