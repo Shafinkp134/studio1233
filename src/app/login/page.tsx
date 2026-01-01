@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { RecaptchaVerifier, signInWithPhoneNumber, Auth, ConfirmationResult } from "firebase/auth";
-import { useAuth, useUser } from "@/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { useAuth, useFirestore, useUser } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { FirestorePermissionError } from "@/firebase/errors";
+import { errorEmitter } from "@/firebase/error-emitter";
 
 const phoneSchema = z.object({
   phone: z.string().regex(/^\+[1-9]\d{1,14}$/, "Please enter a valid phone number with country code (e.g., +919876543210)."),
@@ -24,6 +27,7 @@ const otpSchema = z.object({
 
 export default function LoginPage() {
   const auth = useAuth();
+  const firestore = useFirestore();
   const { user } = useUser();
   const router = useRouter();
   const { toast } = useToast();
@@ -90,7 +94,28 @@ export default function LoginPage() {
     if (!confirmationResult) return;
     setIsSubmitting(true);
     try {
-      await confirmationResult.confirm(values.otp);
+      const userCredential = await confirmationResult.confirm(values.otp);
+      const user = userCredential.user;
+
+      // Save user to Firestore
+      const userRef = doc(firestore, "users", user.uid);
+      const userData = {
+        uid: user.uid,
+        phoneNumber: user.phoneNumber,
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+      };
+
+      setDoc(userRef, userData, { merge: true }).catch(async (serverError) => {
+          const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'create',
+            requestResourceData: userData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+      });
+
       toast({
         title: "Login Successful",
         description: "You have been successfully logged in.",
