@@ -1,15 +1,20 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { RecaptchaVerifier, signInWithPhoneNumber, Auth, ConfirmationResult } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useAuth, useFirestore, useUser } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -17,14 +22,12 @@ import { useToast } from "@/hooks/use-toast";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { errorEmitter } from "@/firebase/error-emitter";
 
-const phoneSchema = z.object({
-  phone: z.string().regex(/^\+[1-9]\d{1,14}$/, "Please enter a valid phone number with country code (e.g., +919876543210)."),
+const formSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
 
-const otpSchema = z.object({
-  otp: z.string().length(6, "OTP must be 6 digits."),
-});
-
+type FormValues = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
   const auth = useAuth();
@@ -32,18 +35,12 @@ export default function LoginPage() {
   const { user } = useUser();
   const router = useRouter();
   const { toast } = useToast();
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-  const recaptchaVerifier = useRef<RecaptchaVerifier | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tab, setTab] = useState("login");
 
-  const phoneForm = useForm<z.infer<typeof phoneSchema>>({
-    resolver: zodResolver(phoneSchema),
-    defaultValues: { phone: "+91" },
-  });
-
-  const otpForm = useForm<z.infer<typeof otpSchema>>({
-    resolver: zodResolver(otpSchema),
-    defaultValues: { otp: "" },
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { email: "", password: "" },
   });
 
   useEffect(() => {
@@ -52,60 +49,43 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-  useEffect(() => {
-    if (!auth || recaptchaVerifier.current) return;
-    recaptchaVerifier.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        }
-      });
-  }, [auth]);
-
-  const handlePhoneSubmit = async (values: z.infer<typeof phoneSchema>) => {
-    if (!auth || !recaptchaVerifier.current) {
-        toast({
-            variant: "destructive",
-            title: "reCAPTCHA not initialized.",
-            description: "Please wait a moment and try again."
-        });
-        return;
-    };
+  const handleLogin = async (values: FormValues) => {
+    if (!auth) return;
     setIsSubmitting(true);
     try {
-      const result = await signInWithPhoneNumber(auth, values.phone, recaptchaVerifier.current);
-      setConfirmationResult(result);
+      await signInWithEmailAndPassword(auth, values.email, values.password);
       toast({
-        title: "OTP Sent",
-        description: "An OTP has been sent to your phone number.",
+        title: "Login Successful",
+        description: "Welcome back!",
       });
+      router.push("/");
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Failed to send OTP",
+        title: "Login Failed",
         description: error.message || "An unexpected error occurred.",
       });
-      setConfirmationResult(null);
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
-  const handleOtpSubmit = async (values: z.infer<typeof otpSchema>) => {
-    if (!confirmationResult) return;
+  const handleSignUp = async (values: FormValues) => {
+    if (!auth || !firestore) return;
     setIsSubmitting(true);
     try {
-      const userCredential = await confirmationResult.confirm(values.otp);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        values.email,
+        values.password
+      );
       const user = userCredential.user;
-
-      // Save user to Firestore
+      
       const userRef = doc(firestore, "users", user.uid);
       const userData = {
         uid: user.uid,
-        phoneNumber: user.phoneNumber,
-        displayName: user.displayName,
         email: user.email,
-        photoURL: user.photoURL,
+        displayName: user.email?.split('@')[0] || '',
       };
 
       setDoc(userRef, userData, { merge: true }).catch(async (serverError) => {
@@ -118,84 +98,85 @@ export default function LoginPage() {
       });
 
       toast({
-        title: "Login Successful",
-        description: "You have been successfully logged in.",
+        title: "Sign Up Successful",
+        description: "Your account has been created.",
       });
       router.push("/");
     } catch (error: any) {
-        toast({
-            variant: "destructive",
-            title: "Invalid OTP",
-            description: "The OTP you entered is incorrect. Please try again.",
-        });
-        setConfirmationResult(null);
-        otpForm.reset();
-        phoneForm.reset({ phone: "+91" });
+      toast({
+        variant: "destructive",
+        title: "Sign Up Failed",
+        description: error.message || "An unexpected error occurred.",
+      });
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
+  const onSubmit = (values: FormValues) => {
+    if (tab === "login") {
+      handleLogin(values);
+    } else {
+      handleSignUp(values);
+    }
+  };
 
   return (
     <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-150px)] px-4 py-12">
         <Card className="w-full max-w-md">
             <CardHeader>
-                <CardTitle className="text-2xl font-bold">Login</CardTitle>
-                <CardDescription>
-                    {confirmationResult ? "Enter the OTP sent to your phone." : "Enter your phone number to receive an OTP."}
+                <CardTitle className="text-2xl font-bold text-center">Welcome</CardTitle>
+                <CardDescription className="text-center">
+                    Sign in or create an account to continue
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                {!confirmationResult ? (
-                    <Form {...phoneForm}>
-                        <form onSubmit={phoneForm.handleSubmit(handlePhoneSubmit)} className="space-y-6">
-                            <FormField
-                                control={phoneForm.control}
-                                name="phone"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Phone Number</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="+91 987 654 3210" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <Button type="submit" className="w-full" disabled={isSubmitting}>
-                                {isSubmitting ? "Sending..." : "Send OTP"}
-                            </Button>
-                        </form>
-                    </Form>
-                ) : (
-                    <Form {...otpForm}>
-                         <form onSubmit={otpForm.handleSubmit(handleOtpSubmit)} className="space-y-6">
-                            <FormField
-                                control={otpForm.control}
-                                name="otp"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>One-Time Password</FormLabel>
-                                        <FormControl>
-                                            <Input 
-                                                placeholder="123456" 
-                                                {...field}
-                                                className="text-center text-2xl tracking-[0.5em] font-mono"
-                                                maxLength={6}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <Button type="submit" className="w-full" disabled={isSubmitting}>
-                                {isSubmitting ? "Verifying..." : "Verify OTP"}
-                            </Button>
-                        </form>
-                    </Form>
-                )}
-                <div id="recaptcha-container"></div>
+                <Tabs value={tab} onValueChange={setTab} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="login">Login</TabsTrigger>
+                        <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="login" />
+                    <TabsContent value="signup" />
+                </Tabs>
+
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                        <Input type="email" placeholder="you@example.com" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Password</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" placeholder="••••••••" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" className="w-full" disabled={isSubmitting}>
+                            {isSubmitting
+                                ? "Processing..."
+                                : tab === "login"
+                                ? "Login"
+                                : "Sign Up"}
+                        </Button>
+                    </form>
+                </Form>
             </CardContent>
         </Card>
     </div>
