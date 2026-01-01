@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -62,7 +63,7 @@ export default function LoginPage() {
   }, [auth]);
 
   const handlePhoneSubmit = async (values: z.infer<typeof phoneSchema>) => {
-    if (!recaptchaVerifier.current) {
+    if (!auth || !recaptchaVerifier.current) {
         toast({
             variant: "destructive",
             title: "reCAPTCHA not initialized.",
@@ -79,12 +80,14 @@ export default function LoginPage() {
         description: "An OTP has been sent to your phone number.",
       });
     } catch (error: any) {
-      console.error(error);
       toast({
         variant: "destructive",
         title: "Failed to send OTP",
         description: error.message || "An unexpected error occurred.",
       });
+      setConfirmationResult(null);
+      otpForm.reset();
+      phoneForm.reset();
     } finally {
         setIsSubmitting(false);
     }
@@ -122,12 +125,13 @@ export default function LoginPage() {
       });
       router.push("/");
     } catch (error: any) {
-        console.error(error);
         toast({
             variant: "destructive",
             title: "Invalid OTP",
             description: "The OTP you entered is incorrect. Please try again.",
-          });
+        });
+        setConfirmationResult(null);
+        otpForm.reset();
     } finally {
         setIsSubmitting(false);
     }
