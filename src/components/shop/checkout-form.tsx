@@ -59,7 +59,7 @@ export function CheckoutForm() {
                 title: "Error",
                 description: "Database not available.",
             });
-            return;
+            return false;
         }
 
         setIsSubmitting(true);
@@ -80,10 +80,10 @@ export function CheckoutForm() {
             
             toast({
                 title: "Order Placed!",
-                description: "Thank you for your purchase.",
+                description: "Thank you for your purchase. Please complete the payment.",
             });
-            clearCart();
-            router.push('/');
+            
+            return true;
 
         } catch (error: any) {
             toast({
@@ -91,10 +91,39 @@ export function CheckoutForm() {
                 title: "Error placing order",
                 description: error.message || "Could not place the order.",
             });
+            return false;
         } finally {
             setIsSubmitting(false);
         }
     }
+
+    const handleWhatsAppPay = async () => {
+        const isValid = await form.trigger();
+        if (!isValid) {
+            toast({
+                variant: "destructive",
+                title: "Invalid Details",
+                description: "Please fill out all the required fields correctly.",
+            });
+            return;
+        }
+        
+        const values = form.getValues();
+        const orderPlaced = await placeOrder(values);
+
+        if (orderPlaced) {
+            const whatsAppNumber = "8590814673";
+            const message = `Hi, I've just placed an order on MrShopiy.
+            \nName: ${values.customerName}
+            \nOrder Total: ₹${cartTotal.toFixed(2)}
+            \nI would like to complete the payment.`;
+            const whatsappUrl = `https://wa.me/${whatsAppNumber}?text=${encodeURIComponent(message)}`;
+            
+            clearCart();
+            window.open(whatsappUrl, '_blank');
+            router.push('/');
+        }
+    };
 
     return (
         <Card>
@@ -104,7 +133,7 @@ export function CheckoutForm() {
             </CardHeader>
             <CardContent>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(placeOrder)} className="space-y-6">
+                    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                         <FormField control={form.control} name="customerName" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Full Name</FormLabel>
@@ -135,11 +164,9 @@ export function CheckoutForm() {
                         )}/>
                         
                         <div className="space-y-4">
-                            <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-                                {isSubmitting ? "Placing Order..." : "Place Order"}
-                            </Button>
-                             <Button variant="outline" className="w-full" size="lg" disabled={isSubmitting} onClick={form.handleSubmit(placeOrder)}>
-                                <Phone className="mr-2 h-4 w-4" /> Pay with PhonePe
+                             <Button onClick={handleWhatsAppPay} className="w-full bg-green-600 hover:bg-green-700 text-white" size="lg" disabled={isSubmitting}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5"><path d="M12.01 2.01a10.02 10.02 0 0 0-8.2 13.43l-1.2 4.38 4.5-1.18A9.95 9.95 0 0 0 12.01 22a10 10 0 0 0 0-20z"/><path d="M17.15 14.36c-.47-.24-2.78-1.37-3.21-1.52s-.76-.23-1.08.23c-.32.47-1.22 1.52-1.49 1.83s-.54.35-1 .12-2.11-.78-4-2.47c-1.48-1.32-2.49-2.95-2.78-3.45s-.3-.76-.07-1c.21-.21.47-.54.71-.81.24-.27.32-.47.47-.78s0-.54-.07-.78-.92-2.2-.92-2.2c-.37-.93-1.08-1.08-1.49-1.08-.32 0-.76.07-1.15.46s-1.49 1.4-1.49 3.45c0 2.05 1.52 4 1.75 4.28s2.95 4.49 7.22 6.32c3.55 1.52 4.26 1.22 4.84.83.58-.39.92-1.37.92-1.37s.24-.24.12-.47z"/></svg>
+                                Pay with WhatsApp
                             </Button>
                         </div>
                     </form>
@@ -148,3 +175,5 @@ export function CheckoutForm() {
         </Card>
     )
 }
+
+    
