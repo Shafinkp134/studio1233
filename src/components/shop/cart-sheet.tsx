@@ -15,7 +15,6 @@ import {
   SheetClose
 } from "@/components/ui/sheet";
 import { ScrollArea } from "../ui/scroll-area";
-import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { Separator } from "../ui/separator";
 
 export function CartSheet() {
@@ -43,17 +42,15 @@ export function CartSheet() {
             <ScrollArea className="flex-1">
               <div className="flex flex-col gap-6 p-6 pr-6">
                 {cartItems.map((item) => {
-                  const placeholder = getPlaceholderImage(item.product.image);
                   return (
                     <div key={item.product.id} className="flex items-start gap-4">
                       <div className="relative h-24 w-24 overflow-hidden rounded-md">
                         <Image
-                          src={placeholder.imageUrl}
+                          src={item.product.image}
                           alt={item.product.name}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           className="object-cover"
-                          data-ai-hint={placeholder.imageHint}
                         />
                       </div>
                       <div className="flex-1">

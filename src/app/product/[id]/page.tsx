@@ -2,7 +2,6 @@
 
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { getPlaceholderImage } from '@/lib/placeholder-images';
 import { StarRating } from '@/components/shop/star-rating';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -16,8 +15,8 @@ import type { Product } from '@/lib/types';
 import { useMemo } from 'react';
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
-    const firestore = useFirestore();
     const { id } = params;
+    const firestore = useFirestore();
 
     const productRef = useMemo(() => {
         if (!firestore) return null;
@@ -34,20 +33,17 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         notFound();
     }
 
-    const placeholder = getPlaceholderImage(product.image);
-
     return (
         <div className="container mx-auto px-4 py-12">
             <div className="grid md:grid-cols-2 gap-12 items-start">
                 <div className="relative aspect-square w-full max-w-md mx-auto">
                     <Card className="overflow-hidden shadow-lg">
                         <Image
-                            src={placeholder.imageUrl}
+                            src={product.image}
                             alt={product.name}
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             className="object-cover"
-                            data-ai-hint={placeholder.imageHint}
                             priority
                         />
                     </Card>

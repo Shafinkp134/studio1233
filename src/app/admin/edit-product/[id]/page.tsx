@@ -30,7 +30,7 @@ const productSchema = z.object({
   price: z.coerce.number().positive("Price must be a positive number"),
   brand: z.enum(['Apple', 'Samsung', 'Anker', 'Generic', 'Nothing']),
   type: z.enum(['Case', 'Charger', 'Cable', 'Screen Protector', 'Phone']),
-  image: z.string().min(1, "Image ID is required"),
+  image: z.string().url("Please enter a valid image URL"),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -128,8 +128,8 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 )}/>
                  <FormField control={form.control} name="image" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Image ID</FormLabel>
-                        <FormControl><Input placeholder="e.g., case-iphone-15" {...field} /></FormControl>
+                        <FormLabel>Image URL</FormLabel>
+                        <FormControl><Input placeholder="https://example.com/image.png" {...field} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )}/>

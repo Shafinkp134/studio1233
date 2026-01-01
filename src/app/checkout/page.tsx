@@ -5,7 +5,6 @@ import { CheckoutForm } from "@/components/shop/checkout-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
-import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -40,7 +39,7 @@ export default function CheckoutPage() {
                             {cartItems.map(item => (
                                 <div key={item.product.id} className="flex items-center gap-4">
                                     <div className="relative h-16 w-16 rounded-md overflow-hidden">
-                                        <Image src={getPlaceholderImage(item.product.image).imageUrl} alt={item.product.name} fill className="object-cover" />
+                                        <Image src={item.product.image} alt={item.product.name} fill className="object-cover" />
                                     </div>
                                     <div className="flex-grow">
                                         <p className="font-medium">{item.product.name}</p>

@@ -14,7 +14,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Truck, PlusCircle } from "lucide-react";
 import {
@@ -131,7 +130,7 @@ export default function AdminPage() {
                           alt={product.name}
                           className="aspect-square rounded-md object-cover"
                           height="64"
-                          src={getPlaceholderImage(product.image).imageUrl}
+                          src={product.image}
                           width="64"
                         />
                       </TableCell>
