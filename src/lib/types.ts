@@ -38,5 +38,5 @@ export type Order = {
         quantity: number;
         price: number;
     }[];
-    paymentScreenshotUrl?: string;
+    transactionId: string;
 };

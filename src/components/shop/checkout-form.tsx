@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { addDoc, collection } from "firebase/firestore";
 import { useForm } from "react-hook-form";
@@ -16,14 +16,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/context/cart-context";
 import { useFirestore, useUser } from "@/firebase";
-import { Upload } from "lucide-react";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
   email: z.string().email("Please enter a valid email"),
   phone: z.string().min(10, "Please enter a valid phone number"),
   address: z.string().min(10, "Please enter a valid address"),
-  paymentScreenshot: z.any().optional(),
+  transactionId: z.string().min(4, "Transaction ID is required"),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -35,8 +34,6 @@ export function CheckoutForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const firestore = useFirestore();
     const { user } = useUser();
-    const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const form = useForm<CheckoutFormValues>({
         resolver: zodResolver(checkoutSchema),
@@ -45,6 +42,7 @@ export function CheckoutForm() {
             email: "",
             phone: "",
             address: "",
+            transactionId: "",
         },
     });
 
@@ -55,33 +53,6 @@ export function CheckoutForm() {
         }
     }, [user, form]);
 
-    async function uploadImage(file: File): Promise<string | null> {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Image upload failed');
-            }
-
-            const data = await response.json();
-            return data.url;
-        } catch (error: any) {
-            toast({
-                variant: "destructive",
-                title: "Error uploading image",
-                description: error.message,
-            });
-            return null;
-        }
-    }
-    
     async function onSubmit(values: CheckoutFormValues) {
         if (!firestore) {
             toast({
@@ -93,17 +64,6 @@ export function CheckoutForm() {
         }
         
         setIsSubmitting(true);
-        let imageUrl: string | undefined;
-        const paymentScreenshotFile = values.paymentScreenshot?.[0];
-
-        if (paymentScreenshotFile) {
-            const uploadedUrl = await uploadImage(paymentScreenshotFile);
-            if (!uploadedUrl) {
-                setIsSubmitting(false);
-                return; 
-            }
-            imageUrl = uploadedUrl;
-        }
 
         try {
             const ordersCollection = collection(firestore, "orders");
@@ -118,12 +78,11 @@ export function CheckoutForm() {
                     quantity: item.quantity,
                     price: item.product.price,
                 })),
-                paymentScreenshotUrl: imageUrl || null,
             });
             
             toast({
                 title: "Order Placed!",
-                description: "Please send the payment to 8590814673 via WhatsApp.",
+                description: "We have received your order and will process it shortly.",
             });
 
             clearCart();
@@ -179,41 +138,18 @@ export function CheckoutForm() {
                             </FormItem>
                         )}/>
                         
-                        <FormField
-                            control={form.control}
-                            name="paymentScreenshot"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Payment Screenshot (Optional)</FormLabel>
-                                    <FormControl>
-                                        <div className="relative">
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                className="w-full justify-start text-left font-normal text-muted-foreground"
-                                                onClick={() => fileInputRef.current?.click()}
-                                            >
-                                                <Upload className="mr-2 h-4 w-4" />
-                                                {selectedFileName || "Upload screenshot..."}
-                                            </Button>
-                                            <Input
-                                                type="file"
-                                                className="hidden"
-                                                ref={fileInputRef}
-                                                accept="image/*"
-                                                onChange={(e) => {
-                                                    field.onChange(e.target.files);
-                                                    setSelectedFileName(e.target.files?.[0]?.name || null);
-                                                }}
-                                            />
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <FormField control={form.control} name="transactionId" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Transaction ID</FormLabel>
+                                <FormControl><Input placeholder="Enter your payment transaction ID" {...field} /></FormControl>
+                                 <FormMessage />
+                            </FormItem>
+                        )}/>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4 pt-4">
+                            <p className="text-sm text-muted-foreground text-center">
+                                Please complete your payment to <span className="font-semibold text-foreground">8590814673</span> via your preferred payment app and enter the transaction ID above.
+                            </p>
                              <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
                                 {isSubmitting ? "Placing Order..." : "Place Order"}
                             </Button>

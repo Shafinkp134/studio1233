@@ -57,9 +57,9 @@
             "required": ["productId", "quantity", "price"]
           }
         },
-        "paymentScreenshotUrl": { "type": "string", "format": "uri" }
+        "transactionId": { "type": "string" }
       },
-      "required": ["id", "customerName", "email", "date", "status", "total", "items", "phone", "address"]
+      "required": ["id", "customerName", "email", "date", "status", "total", "items", "phone", "address", "transactionId"]
     },
     "admin": {
         "title": "Admin",
