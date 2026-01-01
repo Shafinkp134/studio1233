@@ -84,7 +84,7 @@ export default function AdminPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold mb-8 font-headline">Admin Panel</h1>
-      <Tabs defaultValue="products">
+      <Tabs defaultValue="orders">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
