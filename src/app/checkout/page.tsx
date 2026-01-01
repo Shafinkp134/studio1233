@@ -46,13 +46,13 @@ export default function CheckoutPage() {
                                         <p className="font-medium">{item.product.name}</p>
                                         <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
                                     </div>
-                                    <p className="font-medium">${(item.product.price * item.quantity).toFixed(2)}</p>
+                                    <p className="font-medium">₹{(item.product.price * item.quantity).toFixed(2)}</p>
                                 </div>
                             ))}
                             <Separator />
                             <div className="flex justify-between font-bold text-lg">
                                 <p>Total</p>
-                                <p>${cartTotal.toFixed(2)}</p>
+                                <p>₹{cartTotal.toFixed(2)}</p>
                             </div>
                         </CardContent>
                     </Card>

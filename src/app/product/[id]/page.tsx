@@ -56,7 +56,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                     </ul>
 
                     <div className="flex items-baseline gap-4 mt-4">
-                        <span className="text-4xl font-bold">${product.price.toFixed(2)}</span>
+                        <span className="text-4xl font-bold">₹{product.price.toFixed(2)}</span>
                         <AddToCartButton product={product} size="lg" className="w-full max-w-xs">
                             Add to Cart
                         </AddToCartButton>

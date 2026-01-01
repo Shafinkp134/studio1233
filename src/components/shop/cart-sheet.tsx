@@ -60,7 +60,7 @@ export function CartSheet() {
                         <Link href={`/product/${item.product.id}`} className="font-semibold hover:underline">
                            <SheetClose>{item.product.name}</SheetClose>
                         </Link>
-                        <p className="text-sm text-muted-foreground">${item.product.price.toFixed(2)}</p>
+                        <p className="text-sm text-muted-foreground">₹{item.product.price.toFixed(2)}</p>
                         <div className="mt-2 flex items-center gap-2">
                           <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => updateQuantity(item.product.id, item.quantity - 1)}><Minus className="h-4 w-4" /></Button>
                           <span className="w-6 text-center">{item.quantity}</span>
@@ -80,7 +80,7 @@ export function CartSheet() {
               <div className="flex w-full flex-col gap-4">
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Subtotal</span>
-                    <span>${cartTotal.toFixed(2)}</span>
+                    <span>₹{cartTotal.toFixed(2)}</span>
                   </div>
                   <SheetClose asChild>
                     <Button asChild className="w-full">
