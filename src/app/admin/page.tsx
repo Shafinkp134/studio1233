@@ -29,12 +29,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useFirestore } from "@/firebase/provider";
 import { useCollection } from "@/firebase/firestore/use-collection";
 import { collection, doc, deleteDoc } from "firebase/firestore";
-import type { Product } from "@/lib/types";
-import { orders } from "@/lib/orders"; // Import mock orders
+import type { Product, Order } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 
-// For now, we'll hardcode the admin user. In a real app, this would come from a database.
 const ADMIN_EMAIL = "shafinkp444@gmail.com";
 
 export default function AdminPage() {
@@ -47,8 +45,14 @@ export default function AdminPage() {
     if (!firestore) return null;
     return collection(firestore, "products");
   }, [firestore]);
+  
+  const ordersQuery = useMemo(() => {
+    if (!firestore) return null;
+    return collection(firestore, "orders");
+  }, [firestore]);
 
   const { data: products, loading: productsLoading } = useCollection<Product>(productsQuery);
+  const { data: orders, loading: ordersLoading } = useCollection<Order>(ordersQuery);
 
   useEffect(() => {
     if (!userLoading && (!user || user.email !== ADMIN_EMAIL)) {
@@ -73,7 +77,7 @@ export default function AdminPage() {
     }
   };
 
-  if (userLoading || productsLoading || !user || user.email !== ADMIN_EMAIL) {
+  if (userLoading || productsLoading || ordersLoading || !user || user.email !== ADMIN_EMAIL) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
         <p>Loading or redirecting...</p>
@@ -83,7 +87,7 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8 font-headline">Admin Panel</h1>
+      <h1 className="text-3xl font-bold mb-8 font-headline">Orders</h1>
       <Tabs defaultValue="orders">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="products">Products</TabsTrigger>
@@ -200,16 +204,16 @@ export default function AdminPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders.map((order) => (
+                  {orders && orders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
                             <Avatar className="h-9 w-9 hidden sm:flex">
                                 <AvatarImage src={`https://avatar.vercel.sh/${order.email}.png`} alt="Avatar" />
-                                <AvatarFallback>{order.customer.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{order.customerName.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div className="grid gap-0.5">
-                                <p className="font-medium">{order.customer}</p>
+                                <p className="font-medium">{order.customerName}</p>
                                 <p className="text-xs text-muted-foreground">{order.email}</p>
                             </div>
                         </div>

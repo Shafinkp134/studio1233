@@ -1,9 +1,10 @@
 import type { Order } from './types';
 
+// This is mock data and is not used in the application anymore.
 export const orders: Order[] = [
   {
     id: 'ORD001',
-    customer: 'Liam Johnson',
+    customerName: 'Liam Johnson',
     email: 'liam@example.com',
     date: '2024-07-29',
     status: 'Shipped',
@@ -14,7 +15,7 @@ export const orders: Order[] = [
   },
   {
     id: 'ORD002',
-    customer: 'Olivia Smith',
+    customerName: 'Olivia Smith',
     email: 'olivia@example.com',
     date: '2024-07-28',
     status: 'Processing',
@@ -25,7 +26,7 @@ export const orders: Order[] = [
   },
   {
     id: 'ORD003',
-    customer: 'Noah Brown',
+    customerName: 'Noah Brown',
     email: 'noah@example.com',
     date: '2024-07-28',
     status: 'Delivered',
@@ -36,7 +37,7 @@ export const orders: Order[] = [
   },
   {
     id: 'ORD004',
-    customer: 'Emma Jones',
+    customerName: 'Emma Jones',
     email: 'emma@example.com',
     date: '2024-07-27',
     status: 'Shipped',
@@ -48,7 +49,7 @@ export const orders: Order[] = [
   },
     {
     id: 'ORD005',
-    customer: 'James Wilson',
+    customerName: 'James Wilson',
     email: 'james@example.com',
     date: '2024-07-26',
     status: 'Cancelled',

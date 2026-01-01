@@ -26,7 +26,7 @@ export type CartItem = {
 
 export type Order = {
     id: string;
-    customer: string;
+    customerName: string;
     email: string;
     date: string;
     status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';

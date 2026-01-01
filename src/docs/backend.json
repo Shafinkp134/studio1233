@@ -5,29 +5,12 @@
       "description": "A user of the application",
       "type": "object",
       "properties": {
-        "uid": {
-          "type": "string",
-          "description": "The user's unique ID"
-        },
-        "email": {
-          "type": "string",
-          "format": "email",
-          "description": "The user's email address"
-        },
-        "displayName": {
-          "type": "string",
-          "description": "The user's display name"
-        },
-        "photoURL": {
-          "type": "string",
-          "format": "uri",
-          "description": "The URL of the user's profile picture"
-        }
+        "uid": { "type": "string", "description": "The user's unique ID" },
+        "email": { "type": "string", "format": "email", "description": "The user's email address" },
+        "displayName": { "type": "string", "description": "The user's display name" },
+        "photoURL": { "type": "string", "format": "uri", "description": "The URL of the user's profile picture" }
       },
-      "required": [
-        "uid",
-        "email"
-      ]
+      "required": ["uid", "email"]
     },
     "product": {
       "title": "Product",
@@ -59,12 +42,36 @@
         }
       },
       "required": ["id", "name", "price", "image", "brand", "type"]
+    },
+    "order": {
+      "title": "Order",
+      "description": "A customer order",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "date": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["Processing", "Shipped", "Delivered", "Cancelled"] },
+        "total": { "type": "number" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "quantity": { "type": "number" },
+              "price": { "type": "number" }
+            },
+            "required": ["productId", "quantity", "price"]
+          }
+        }
+      },
+      "required": ["id", "customerName", "email", "date", "status", "total", "items"]
     }
   },
   "auth": {
-    "providers": [
-      "email"
-    ]
+    "providers": ["email"]
   },
   "firestore": {
     "/users/{userId}": {
@@ -74,6 +81,10 @@
     "/products/{productId}": {
       "schema": "product",
       "description": "Stores product information."
+    },
+    "/orders/{orderId}": {
+        "schema": "order",
+        "description": "Stores customer order information."
     }
   }
 }
