@@ -28,6 +28,8 @@ export type Order = {
     id: string;
     customerName: string;
     email: string;
+    phone: string;
+    address: string;
     date: string;
     status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
     total: number;

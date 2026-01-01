@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/context/cart-context";
 import { useFirestore, useUser } from "@/firebase";
@@ -20,6 +21,8 @@ import { Phone } from "lucide-react";
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
   email: z.string().email("Please enter a valid email"),
+  phone: z.string().min(10, "Please enter a valid phone number"),
+  address: z.string().min(10, "Please enter a valid address"),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -37,6 +40,8 @@ export function CheckoutForm() {
         defaultValues: {
             customerName: "",
             email: "",
+            phone: "",
+            address: "",
         },
     });
 
@@ -61,8 +66,7 @@ export function CheckoutForm() {
         try {
             const ordersCollection = collection(firestore, "orders");
             await addDoc(ordersCollection, {
-                customerName: values.customerName,
-                email: values.email,
+                ...values,
                 date: new Date().toISOString(),
                 status: 'Processing',
                 total: cartTotal,
@@ -104,14 +108,28 @@ export function CheckoutForm() {
                         <FormField control={form.control} name="customerName" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Full Name</FormLabel>
-                                <FormControl><Input placeholder="Jane Doe" {...field} disabled={!!user} /></FormControl>
+                                <FormControl><Input placeholder="Jane Doe" {...field} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}/>
                         <FormField control={form.control} name="email" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Email Address</FormLabel>
-                                <FormControl><Input type="email" placeholder="you@example.com" {...field} disabled={!!user} /></FormControl>
+                                <FormControl><Input type="email" placeholder="you@example.com" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                         <FormField control={form.control} name="phone" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Phone Number</FormLabel>
+                                <FormControl><Input type="tel" placeholder="+91 1234567890" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        <FormField control={form.control} name="address" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Shipping Address</FormLabel>
+                                <FormControl><Textarea placeholder="123 Main St, Anytown, USA 12345" {...field} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}/>
@@ -120,7 +138,7 @@ export function CheckoutForm() {
                             <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
                                 {isSubmitting ? "Placing Order..." : "Place Order"}
                             </Button>
-                            <Button variant="outline" className="w-full" size="lg" disabled={isSubmitting} onClick={form.handleSubmit(placeOrder)}>
+                             <Button variant="outline" className="w-full" size="lg" disabled={isSubmitting} onClick={form.handleSubmit(placeOrder)}>
                                 <Phone className="mr-2 h-4 w-4" /> Pay with PhonePe
                             </Button>
                         </div>

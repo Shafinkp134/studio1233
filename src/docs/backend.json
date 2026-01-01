@@ -40,6 +40,8 @@
         "id": { "type": "string" },
         "customerName": { "type": "string" },
         "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
         "date": { "type": "string", "format": "date-time" },
         "status": { "type": "string", "enum": ["Processing", "Shipped", "Delivered", "Cancelled"] },
         "total": { "type": "number" },
@@ -56,7 +58,7 @@
           }
         }
       },
-      "required": ["id", "customerName", "email", "date", "status", "total", "items"]
+      "required": ["id", "customerName", "email", "date", "status", "total", "items", "phone", "address"]
     },
     "admin": {
         "title": "Admin",

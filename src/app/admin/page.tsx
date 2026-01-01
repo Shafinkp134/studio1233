@@ -191,7 +191,7 @@ export default function AdminPage() {
                   <TableRow>
                     <TableHead>Customer</TableHead>
                     <TableHead className="hidden sm:table-cell">
-                      Order ID
+                      Contact
                     </TableHead>
                     <TableHead className="hidden sm:table-cell">
                       Status
@@ -214,12 +214,15 @@ export default function AdminPage() {
                             </Avatar>
                             <div className="grid gap-0.5">
                                 <p className="font-medium">{order.customerName}</p>
-                                <p className="text-xs text-muted-foreground">{order.email}</p>
+                                <p className="text-xs text-muted-foreground truncate max-w-[150px]">{order.address}</p>
                             </div>
                         </div>
                       </TableCell>
-                       <TableCell className="hidden sm:table-cell font-mono text-xs">
-                        {order.id}
+                       <TableCell className="hidden sm:table-cell">
+                         <div className="grid gap-0.5">
+                            <p className="text-xs text-muted-foreground">{order.email}</p>
+                            <p className="text-xs text-muted-foreground">{order.phone}</p>
+                         </div>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
                         <Badge
