@@ -56,18 +56,21 @@ async function getProductsFromFirestore(ids: string[] = [], count: number = 5): 
 
 
 export async function Recommendations() {
+  /*
   const recommendationsInput = {
     userId: 'user-123',
     browsingHistory: ['case-samsung-s23', 'charger-anker-pd'],
     purchaseHistory: ['cable-apple-lightning'],
     userCharacteristics: 'Owns an iPhone 14 Pro and a Samsung Galaxy S23. Tech enthusiast who values fast charging and durability.'
   };
+  */
 
   let recommendedProducts: Product[] = [];
   try {
-    const result = await getPersonalizedRecommendations(recommendationsInput);
-    const recommendedIds = result.recommendedProducts;
-    recommendedProducts = await getProductsFromFirestore(recommendedIds, 5);
+    // const result = await getPersonalizedRecommendations(recommendationsInput);
+    // const recommendedIds = result.recommendedProducts;
+    // recommendedProducts = await getProductsFromFirestore(recommendedIds, 5);
+    recommendedProducts = await getProductsFromFirestore([], 5);
 
   } catch (error) {
     console.error("Error fetching AI recommendations, falling back to recent products:", error);
