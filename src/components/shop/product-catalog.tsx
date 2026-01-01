@@ -11,8 +11,8 @@ interface ProductCatalogProps {
   allProducts: Product[];
 }
 
-const brands = ["All", "Apple", "Samsung", "Anker", "Generic"];
-const types = ["All", "Case", "Charger", "Cable", "Screen Protector"];
+const brands = ["All", "Apple", "Samsung", "Anker", "Generic", "Nothing"];
+const types = ["All", "Case", "Charger", "Cable", "Screen Protector", "Phone"];
 
 export function ProductCatalog({ allProducts }: ProductCatalogProps) {
   const [searchTerm, setSearchTerm] = useState("");

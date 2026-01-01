@@ -4,8 +4,8 @@ export type Product = {
   description: string;
   price: number;
   image: string;
-  brand: 'Apple' | 'Samsung' | 'Anker' | 'Generic';
-  type: 'Case' | 'Charger' | 'Cable' | 'Screen Protector';
+  brand: 'Apple' | 'Samsung' | 'Anker' | 'Generic' | 'Nothing';
+  type: 'Case' | 'Charger' | 'Cable' | 'Screen Protector' | 'Phone';
   rating: number;
   reviews: Review[];
   features: string[];

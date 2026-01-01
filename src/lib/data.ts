@@ -114,4 +114,19 @@ export const products: Product[] = [
       { id: 'r9', author: 'Ben C.', rating: 5, text: 'Finally, a screen protector that works with the fingerprint reader!', date: '2023-09-25' },
     ],
   },
+  {
+    id: 'nothing-phone-1',
+    name: 'Nothing Phone (1)',
+    description: 'A transparent design smartphone with a unique Glyph Interface.',
+    price: 120.00,
+    image: 'nothing-phone-1',
+    brand: 'Nothing',
+    type: 'Phone',
+    rating: 4.6,
+    features: ['Glyph Interface', '50 MP dual camera', '120Hz OLED display', 'Nothing OS'],
+    reviews: [
+        { id: 'r10', author: 'Alex', rating: 5, text: 'Amazing design and snappy performance.', date: '2023-11-01' },
+        { id: 'r11', author: 'Maria', rating: 4, text: 'Cool phone, but the battery could be better.', date: '2023-11-05' }
+    ]
+  }
 ];

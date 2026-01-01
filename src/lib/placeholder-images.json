@@ -39,6 +39,11 @@
       "id": "sp-samsung-s23",
       "imageUrl": "https://images.unsplash.com/photo-1704392354269-42ad41f15398?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxnbGFzcyUyMHNjcmVlbiUyMHByb3RlY3RvcnxlbnwwfHx8fDE3NjcyNDQ5Nzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "glass screen protector"
+    },
+    {
+      "id": "nothing-phone-1",
+      "imageUrl": "https://storage.googleapis.com/stabl-media/66a8e57890476c5b736b4a2a_nothing-phone.png",
+      "imageHint": "nothing phone"
     }
   ]
 }
