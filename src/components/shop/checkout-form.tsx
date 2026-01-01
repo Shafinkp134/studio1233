@@ -1,13 +1,28 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { addDoc, collection } from "firebase/firestore";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/context/cart-context";
 import { useFirestore, useUser } from "@/firebase";
+import { Phone } from "lucide-react";
+
+const checkoutSchema = z.object({
+  customerName: z.string().min(2, "Name is required"),
+  email: z.string().email("Please enter a valid email"),
+});
+
+type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 export function CheckoutForm() {
     const { toast } = useToast();
@@ -17,12 +32,27 @@ export function CheckoutForm() {
     const firestore = useFirestore();
     const { user } = useUser();
 
-    async function placeOrder() {
-        if (!firestore || !user || !user.email) {
+    const form = useForm<CheckoutFormValues>({
+        resolver: zodResolver(checkoutSchema),
+        defaultValues: {
+            customerName: "",
+            email: "",
+        },
+    });
+
+    useEffect(() => {
+        if (user) {
+            form.setValue("customerName", user.displayName || "");
+            form.setValue("email", user.email || "");
+        }
+    }, [user, form]);
+
+    async function placeOrder(values: CheckoutFormValues) {
+        if (!firestore) {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "You must be logged in to place an order.",
+                description: "Database not available.",
             });
             return;
         }
@@ -31,13 +61,14 @@ export function CheckoutForm() {
         try {
             const ordersCollection = collection(firestore, "orders");
             await addDoc(ordersCollection, {
-                customerName: user.displayName || user.email,
-                email: user.email,
+                customerName: values.customerName,
+                email: values.email,
                 date: new Date().toISOString(),
                 status: 'Processing',
                 total: cartTotal,
                 items: cartItems.map(item => ({
                     productId: item.product.id,
+                    productName: item.product.name,
                     quantity: item.quantity,
                     price: item.product.price,
                 })),
@@ -45,7 +76,7 @@ export function CheckoutForm() {
             
             toast({
                 title: "Order Placed!",
-                description: "Thank you for your purchase. This is a development order.",
+                description: "Thank you for your purchase.",
             });
             clearCart();
             router.push('/');
@@ -64,15 +95,37 @@ export function CheckoutForm() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Development Checkout</CardTitle>
-                <CardDescription>Click the button below to simulate an order.</CardDescription>
+                <CardTitle>Contact Information</CardTitle>
+                <CardDescription>Please provide your details to complete the order.</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="space-y-4">
-                    <Button onClick={placeOrder} className="w-full" size="lg" disabled={isSubmitting}>
-                        {isSubmitting ? "Placing Order..." : "Place Development Order"}
-                    </Button>
-                </div>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(placeOrder)} className="space-y-6">
+                        <FormField control={form.control} name="customerName" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Full Name</FormLabel>
+                                <FormControl><Input placeholder="Jane Doe" {...field} disabled={!!user} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        <FormField control={form.control} name="email" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email Address</FormLabel>
+                                <FormControl><Input type="email" placeholder="you@example.com" {...field} disabled={!!user} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}/>
+                        
+                        <div className="space-y-4">
+                            <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                                {isSubmitting ? "Placing Order..." : "Place Order"}
+                            </Button>
+                            <Button variant="outline" className="w-full" size="lg" disabled={isSubmitting} onClick={form.handleSubmit(placeOrder)}>
+                                <Phone className="mr-2 h-4 w-4" /> Pay with PhonePe
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
             </CardContent>
         </Card>
     )
