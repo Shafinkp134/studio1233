@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useUser } from "@/firebase";
@@ -55,7 +56,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!userLoading && (!user || user.email !== ADMIN_EMAIL)) {
-      router.push("/");
+      router.push("/login");
     }
   }, [user, userLoading, router]);
 
@@ -203,7 +204,7 @@ export default function AdminPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders && orders.map((order) => (
+                  {orders && orders.length > 0 ? orders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -257,7 +258,13 @@ export default function AdminPage() {
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center">
+                        No orders found.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>

@@ -1,17 +1,6 @@
+
 {
   "entities": {
-    "user": {
-      "title": "User",
-      "description": "A user of the application",
-      "type": "object",
-      "properties": {
-        "uid": { "type": "string", "description": "The user's unique ID" },
-        "email": { "type": "string", "format": "email", "description": "The user's email address" },
-        "displayName": { "type": "string", "description": "The user's display name" },
-        "photoURL": { "type": "string", "format": "uri", "description": "The URL of the user's profile picture" }
-      },
-      "required": ["uid", "email"]
-    },
     "product": {
       "title": "Product",
       "description": "A product in the store",
@@ -68,6 +57,16 @@
         }
       },
       "required": ["id", "customerName", "email", "date", "status", "total", "items"]
+    },
+    "admin": {
+        "title": "Admin",
+        "description": "An admin user of the application",
+        "type": "object",
+        "properties": {
+          "uid": { "type": "string", "description": "The user's unique ID" },
+          "email": { "type": "string", "format": "email", "description": "The user's email address" }
+        },
+        "required": ["uid", "email"]
     }
   },
   "auth": {
@@ -75,8 +74,8 @@
   },
   "firestore": {
     "/users/{userId}": {
-      "schema": "user",
-      "description": "Stores user profile information."
+      "schema": "admin",
+      "description": "Stores admin user profile information."
     },
     "/products/{productId}": {
       "schema": "product",
