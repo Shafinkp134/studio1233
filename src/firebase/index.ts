@@ -24,3 +24,5 @@ export {
 } from './provider';
 
 export { useUser } from './auth/use-user';
+export { useCollection } from './firestore/use-collection';
+export { useDocument } from './firestore/use-doc';

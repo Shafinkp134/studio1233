@@ -1,9 +1,56 @@
+
 "use server";
 
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-accessory-recommendations';
-import { products } from '@/lib/data';
 import { ProductCard } from './product-card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { collection, getDocs, limit, query, where } from 'firebase/firestore';
+import { initializeFirebase } from '@/firebase';
+import type { Product } from '@/lib/types';
+
+
+async function getProductsFromFirestore(ids: string[] = [], count: number = 5): Promise<Product[]> {
+    const { firestore } = initializeFirebase();
+    const productsCol = collection(firestore, 'products');
+    let products: Product[] = [];
+
+    if (ids.length > 0) {
+        // Firestore 'in' query is limited to 30 elements.
+        const productChunks = [];
+        for (let i = 0; i < ids.length; i += 30) {
+            productChunks.push(ids.slice(i, i + 30));
+        }
+        try {
+            for (const chunk of productChunks) {
+                if (chunk.length > 0) {
+                    const q = query(productsCol, where('__name__', 'in', chunk));
+                    const querySnapshot = await getDocs(q);
+                    querySnapshot.forEach((doc) => {
+                        products.push({ id: doc.id, ...doc.data() } as Product);
+                    });
+                }
+            }
+        } catch (e) {
+            console.log("Error fetching products by ID, falling back to recent", e);
+            products = []; // Clear out partial results
+        }
+    }
+    
+    if (products.length < count) {
+        const q = query(productsCol, limit(count - products.length));
+        const querySnapshot = await getDocs(q);
+        const fallbackProducts: Product[] = [];
+        querySnapshot.forEach((doc) => {
+            if (!products.some(p => p.id === doc.id)) {
+                 fallbackProducts.push({ id: doc.id, ...doc.data() } as Product);
+            }
+        });
+        products = [...products, ...fallbackProducts];
+    }
+    
+    return products.slice(0, count);
+}
+
 
 export async function Recommendations() {
   const recommendationsInput = {
@@ -13,22 +60,16 @@ export async function Recommendations() {
     userCharacteristics: 'Owns an iPhone 14 Pro and a Samsung Galaxy S23. Tech enthusiast who values fast charging and durability.'
   };
 
-  let recommendedProducts = [];
+  let recommendedProducts: Product[] = [];
   try {
     const result = await getPersonalizedRecommendations(recommendationsInput);
     const recommendedIds = result.recommendedProducts;
-    
-    // Find the full product objects from our mock data
-    const foundProducts = products.filter(p => recommendedIds.includes(p.id));
-
-    // To ensure we have some products, combine with a fallback
-    const fallbackProducts = products.filter(p => !recommendedIds.includes(p.id));
-    recommendedProducts = [...foundProducts, ...fallbackProducts].slice(0, 5);
+    recommendedProducts = await getProductsFromFirestore(recommendedIds, 5);
 
   } catch (error) {
-    console.error("Error fetching recommendations:", error);
+    console.log("Error fetching recommendations, falling back to recent products:", error);
     // Fallback to showing first 5 products on error
-    recommendedProducts = products.slice(0, 5);
+    recommendedProducts = await getProductsFromFirestore([], 5);
   }
   
   if (recommendedProducts.length === 0) {
