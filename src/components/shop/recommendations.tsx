@@ -36,11 +36,14 @@ async function getProductsFromFirestore(ids: string[] = [], count: number = 5): 
         }
     }
     
+    // If after fetching by IDs we still don't have enough products, fetch recent ones.
     if (products.length < count) {
-        const q = query(productsCol, limit(count - products.length));
+        const needed = count - products.length;
+        const q = query(productsCol, limit(needed));
         const querySnapshot = await getDocs(q);
         const fallbackProducts: Product[] = [];
         querySnapshot.forEach((doc) => {
+            // Avoid adding duplicates if some products were already fetched by ID
             if (!products.some(p => p.id === doc.id)) {
                  fallbackProducts.push({ id: doc.id, ...doc.data() } as Product);
             }
@@ -67,12 +70,12 @@ export async function Recommendations() {
     recommendedProducts = await getProductsFromFirestore(recommendedIds, 5);
 
   } catch (error) {
-    console.log("Error fetching recommendations, falling back to recent products:", error);
-    // Fallback to showing first 5 products on error
+    console.error("Error fetching AI recommendations, falling back to recent products:", error);
+    // Fallback to showing recent products on any error
     recommendedProducts = await getProductsFromFirestore([], 5);
   }
   
-  if (recommendedProducts.length === 0) {
+  if (!recommendedProducts || recommendedProducts.length === 0) {
     return null;
   }
 
