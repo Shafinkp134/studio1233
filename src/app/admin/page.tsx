@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { getPlaceholderImage } from "@/lib/placeholder-images";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Truck } from "lucide-react";
+import { MoreHorizontal, Truck, PlusCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +32,7 @@ import { collection, doc, deleteDoc } from "firebase/firestore";
 import type { Product } from "@/lib/types";
 import { orders } from "@/lib/orders"; // Import mock orders
 import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 // For now, we'll hardcode the admin user. In a real app, this would come from a database.
 const ADMIN_EMAIL = "shafinkp444@gmail.com";
@@ -91,7 +92,14 @@ export default function AdminPage() {
         <TabsContent value="products">
           <Card>
             <CardHeader>
-              <CardTitle>Products</CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle>Products</CardTitle>
+                <Button asChild>
+                  <Link href="/admin/add-product">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add Product
+                  </Link>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
