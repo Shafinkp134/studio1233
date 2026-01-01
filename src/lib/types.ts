@@ -23,3 +23,17 @@ export type CartItem = {
   product: Product;
   quantity: number;
 };
+
+export type Order = {
+    id: string;
+    customer: string;
+    email: string;
+    date: string;
+    status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+    total: number;
+    items: {
+        productId: string;
+        quantity: number;
+        price: number;
+    }[];
+};
