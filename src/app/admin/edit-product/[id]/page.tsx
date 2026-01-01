@@ -162,7 +162,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                         <FormControl>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a product type" />
-                            </Trigger>
+                            </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                             <SelectItem value="Case">Case</SelectItem>
