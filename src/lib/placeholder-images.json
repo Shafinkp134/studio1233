@@ -1,3 +1,44 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "case-iphone-15",
+      "imageUrl": "https://images.unsplash.com/photo-1762681829945-c260685037de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjbGVhciUyMHBob25lJTIwY2FzZXxlbnwwfHx8fDE3NjcyNDQ5Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "clear phone case"
+    },
+    {
+      "id": "case-samsung-s23",
+      "imageUrl": "https://images.unsplash.com/photo-1667239548362-6bf4ccfd92b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxsZWF0aGVyJTIwcGhvbmUlMjBjYXNlfGVufDB8fHx8MTc2NzI0NDk3OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "leather phone case"
+    },
+    {
+      "id": "charger-anker-pd",
+      "imageUrl": "https://images.unsplash.com/photo-1760539065178-a63556c2d004?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx3YWxsJTIwY2hhcmdlcnxlbnwwfHx8fDE3NjcyNDQ5Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wall charger"
+    },
+    {
+      "id": "charger-samsung-wireless",
+      "imageUrl": "https://images.unsplash.com/photo-1615526675221-e763c4ec84f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3aXJlbGVzcyUyMGNoYXJnZXJ8ZW58MHx8fHwxNzY3MjQ0OTc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wireless charger"
+    },
+    {
+      "id": "cable-apple-lightning",
+      "imageUrl": "https://images.unsplash.com/photo-1745392842741-10dd83fa4dca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjaGFyZ2luZyUyMGNhYmxlfGVufDB8fHx8MTc2NzI0NDk3OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "charging cable"
+    },
+    {
+      "id": "cable-anker-usbc",
+      "imageUrl": "https://images.unsplash.com/photo-1766976898196-227348d60914?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxicmFpZGVkJTIwY2FibGV8ZW58MHx8fHwxNzY3MjQ0OTc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "braided cable"
+    },
+    {
+      "id": "sp-iphone-15",
+      "imageUrl": "https://images.unsplash.com/photo-1714058948949-4414c2007759?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzY3JlZW4lMjBwcm90ZWN0b3J8ZW58MHx8fHwxNzY3MTc1MDEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "screen protector"
+    },
+    {
+      "id": "sp-samsung-s23",
+      "imageUrl": "https://images.unsplash.com/photo-1704392354269-42ad41f15398?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxnbGFzcyUyMHNjcmVlbiUyMHByb3RlY3RvcnxlbnwwfHx8fDE3NjcyNDQ5Nzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "glass screen protector"
+    }
+  ]
 }
