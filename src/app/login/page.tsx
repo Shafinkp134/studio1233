@@ -86,8 +86,6 @@ export default function LoginPage() {
         description: error.message || "An unexpected error occurred.",
       });
       setConfirmationResult(null);
-      otpForm.reset();
-      phoneForm.reset();
     } finally {
         setIsSubmitting(false);
     }
@@ -132,6 +130,7 @@ export default function LoginPage() {
         });
         setConfirmationResult(null);
         otpForm.reset();
+        phoneForm.reset({ phone: "+91" });
     } finally {
         setIsSubmitting(false);
     }
