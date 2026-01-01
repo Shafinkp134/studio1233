@@ -157,7 +157,9 @@ export default function AdminPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link href={`/admin/edit-product/${product.id}`}>Edit</Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleDeleteProduct(product.id)}
                               className="text-destructive"
