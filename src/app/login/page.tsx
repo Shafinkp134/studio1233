@@ -25,6 +25,7 @@ import { errorEmitter } from "@/firebase/error-emitter";
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  photoURL: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -40,7 +41,7 @@ export default function LoginPage() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", password: "", photoURL: "" },
   });
 
   useEffect(() => {
@@ -81,11 +82,17 @@ export default function LoginPage() {
       );
       const user = userCredential.user;
       
+      const displayName = user.email?.split('@')[0] || '';
+      const photoURL = values.photoURL || '';
+
+      await updateProfile(user, { displayName, photoURL });
+
       const userRef = doc(firestore, "users", user.uid);
       const userData = {
         uid: user.uid,
         email: user.email,
-        displayName: user.email?.split('@')[0] || '',
+        displayName: displayName,
+        photoURL: photoURL,
       };
 
       setDoc(userRef, userData, { merge: true }).catch(async (serverError) => {
@@ -168,6 +175,21 @@ export default function LoginPage() {
                                 </FormItem>
                             )}
                         />
+                        {tab === "signup" && (
+                          <FormField
+                            control={form.control}
+                            name="photoURL"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Photo URL (Optional)</FormLabel>
+                                <FormControl>
+                                  <Input type="text" placeholder="https://example.com/photo.jpg" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
                         <Button type="submit" className="w-full" disabled={isSubmitting}>
                             {isSubmitting
                                 ? "Processing..."
