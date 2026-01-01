@@ -12,7 +12,7 @@ import { useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useDocument } from '@/firebase/firestore/use-doc';
 import type { Product } from '@/lib/types';
-import { useMemo } from 'react';
+import { use, useMemo } from 'react';
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
     const { id } = params;

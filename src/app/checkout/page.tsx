@@ -7,21 +7,28 @@ import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/firebase";
+
+const ADMIN_EMAIL = "shafinkp444@gmail.com";
 
 export default function CheckoutPage() {
     const { cartItems, cartTotal, itemCount } = useCart();
     const router = useRouter();
+    const { user, loading: userLoading } = useUser();
 
     useEffect(() => {
-        if (itemCount === 0) {
+        if (!userLoading && (!user || user.email !== ADMIN_EMAIL)) {
             router.push('/');
         }
-    }, [itemCount, router]);
+        if (!userLoading && itemCount === 0 && user?.email === ADMIN_EMAIL) {
+            router.push('/');
+        }
+    }, [itemCount, router, user, userLoading]);
 
-    if (itemCount === 0) {
+    if (userLoading || !user || user.email !== ADMIN_EMAIL || itemCount === 0) {
         return (
             <div className="container mx-auto px-4 py-12 text-center">
-                <p>Redirecting to homepage...</p>
+                <p>Loading or redirecting...</p>
             </div>
         );
     }

@@ -35,7 +35,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </CardTitle>
         <div className="flex items-center gap-2">
             <StarRating rating={product.rating} />
-            <span className="text-sm text-muted-foreground">({product.reviews.length})</span>
+            <span className="text-sm text-muted-foreground">({product.reviews?.length || 0})</span>
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between items-center">
