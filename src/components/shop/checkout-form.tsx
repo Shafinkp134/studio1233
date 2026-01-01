@@ -82,7 +82,7 @@ export function CheckoutForm() {
             
             toast({
                 title: "Order Placed!",
-                description: "We have received your order and will process it shortly.",
+                description: "We have received your order. Please send the payment to 8590814673 via your preferred payment app.",
             });
 
             clearCart();
@@ -138,22 +138,22 @@ export function CheckoutForm() {
                             </FormItem>
                         )}/>
                         
-                        <FormField control={form.control} name="transactionId" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Transaction ID</FormLabel>
-                                <FormControl><Input placeholder="Enter your payment transaction ID" {...field} /></FormControl>
-                                 <FormMessage />
-                            </FormItem>
-                        )}/>
-
                         <div className="space-y-4 pt-4">
                             <p className="text-sm text-muted-foreground text-center">
-                                Please complete your payment to <span className="font-semibold text-foreground">8590814673</span> via your preferred payment app and enter the transaction ID above.
+                                Please complete your payment to <span className="font-semibold text-foreground">8590814673</span> via your preferred payment app and enter the transaction ID below.
                             </p>
-                             <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-                                {isSubmitting ? "Placing Order..." : "Place Order"}
-                            </Button>
+                            <FormField control={form.control} name="transactionId" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Transaction ID</FormLabel>
+                                    <FormControl><Input placeholder="Enter your payment transaction ID" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
                         </div>
+
+                        <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                            {isSubmitting ? "Placing Order..." : "Place Order"}
+                        </Button>
                     </form>
                 </Form>
             </CardContent>
