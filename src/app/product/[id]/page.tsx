@@ -13,15 +13,16 @@ import { useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useDocument } from '@/firebase/firestore/use-doc';
 import type { Product } from '@/lib/types';
-import { useMemo } from 'react';
+import { useMemo, use } from 'react';
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
     const firestore = useFirestore();
+    const { id } = use(Promise.resolve(params));
 
     const productRef = useMemo(() => {
         if (!firestore) return null;
-        return doc(firestore, 'products', params.id);
-    }, [firestore, params.id]);
+        return doc(firestore, 'products', id);
+    }, [firestore, id]);
 
     const { data: product, loading } = useDocument<Product>(productRef);
 

@@ -22,7 +22,7 @@ import { useFirestore } from "@/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { useDocument } from "@/firebase/firestore/use-doc";
 import type { Product } from "@/lib/types";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, use } from "react";
 
 const productSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -36,7 +36,7 @@ const productSchema = z.object({
 type ProductFormValues = z.infer<typeof productSchema>;
 
 export default function EditProductPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+  const { id } = use(Promise.resolve(params));
   const { toast } = useToast();
   const router = useRouter();
   const firestore = useFirestore();
