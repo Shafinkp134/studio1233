@@ -1,10 +1,8 @@
 "use client";
 
-import { products } from "@/lib/data";
-import { orders } from "@/lib/orders"; // Import mock orders
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Table,
   TableHeader,
@@ -28,21 +26,53 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useFirestore } from "@/firebase/provider";
+import { useCollection } from "@/firebase/firestore/use-collection";
+import { collection, doc, deleteDoc } from "firebase/firestore";
+import type { Product } from "@/lib/types";
+import { orders } from "@/lib/orders"; // Import mock orders
+import { useToast } from "@/hooks/use-toast";
 
 // For now, we'll hardcode the admin user. In a real app, this would come from a database.
 const ADMIN_EMAIL = "shafinkp444@gmail.com";
 
 export default function AdminPage() {
-  const { user, loading } = useUser();
+  const { user, loading: userLoading } = useUser();
   const router = useRouter();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+
+  const productsQuery = useMemo(() => {
+    if (!firestore) return null;
+    return collection(firestore, "products");
+  }, [firestore]);
+
+  const { data: products, loading: productsLoading } = useCollection<Product>(productsQuery);
 
   useEffect(() => {
-    if (!loading && (!user || user.email !== ADMIN_EMAIL)) {
+    if (!userLoading && (!user || user.email !== ADMIN_EMAIL)) {
       router.push("/");
     }
-  }, [user, loading, router]);
+  }, [user, userLoading, router]);
 
-  if (loading || !user || user.email !== ADMIN_EMAIL) {
+  const handleDeleteProduct = async (productId: string) => {
+    if (!firestore) return;
+    try {
+      await deleteDoc(doc(firestore, "products", productId));
+      toast({
+        title: "Product Deleted",
+        description: "The product has been removed successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error deleting product",
+        description: error.message || "Could not delete the product.",
+      });
+    }
+  };
+
+  if (userLoading || productsLoading || !user || user.email !== ADMIN_EMAIL) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
         <p>Loading or redirecting...</p>
@@ -82,7 +112,7 @@ export default function AdminPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {products.map((product) => (
+                  {products && products.map((product) => (
                     <TableRow key={product.id}>
                       <TableCell className="hidden sm:table-cell">
                         <Image
@@ -120,7 +150,12 @@ export default function AdminPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="text-destructive"
+                            >
+                              Delete
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
