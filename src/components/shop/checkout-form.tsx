@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { addDoc, collection } from "firebase/firestore";
 import { useForm } from "react-hook-form";
@@ -16,13 +16,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/context/cart-context";
 import { useFirestore, useUser } from "@/firebase";
-import { Phone } from "lucide-react";
+import { Upload } from "lucide-react";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
   email: z.string().email("Please enter a valid email"),
   phone: z.string().min(10, "Please enter a valid phone number"),
   address: z.string().min(10, "Please enter a valid address"),
+  paymentScreenshot: z.any().optional(),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -34,6 +35,8 @@ export function CheckoutForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const firestore = useFirestore();
     const { user } = useUser();
+    const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const form = useForm<CheckoutFormValues>({
         resolver: zodResolver(checkoutSchema),
@@ -52,7 +55,34 @@ export function CheckoutForm() {
         }
     }, [user, form]);
 
-    async function placeOrder(values: CheckoutFormValues) {
+    async function uploadImage(file: File): Promise<string | null> {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Image upload failed');
+            }
+
+            const data = await response.json();
+            return data.url;
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Error uploading image",
+                description: error.message,
+            });
+            return null;
+        }
+    }
+
+    async function placeOrder(values: CheckoutFormValues, imageUrl?: string) {
         if (!firestore) {
             toast({
                 variant: "destructive",
@@ -76,6 +106,7 @@ export function CheckoutForm() {
                     quantity: item.quantity,
                     price: item.product.price,
                 })),
+                paymentScreenshotUrl: imageUrl || null,
             });
             
             toast({
@@ -109,7 +140,22 @@ export function CheckoutForm() {
         }
         
         const values = form.getValues();
-        const orderPlaced = await placeOrder(values);
+        let imageUrl: string | undefined;
+
+        const paymentScreenshotFile = values.paymentScreenshot?.[0];
+
+        if (paymentScreenshotFile) {
+            setIsSubmitting(true);
+            const uploadedUrl = await uploadImage(paymentScreenshotFile);
+            setIsSubmitting(false);
+            if (!uploadedUrl) {
+                // Error toast is shown in uploadImage function
+                return;
+            }
+            imageUrl = uploadedUrl;
+        }
+
+        const orderPlaced = await placeOrder(values, imageUrl);
 
         if (orderPlaced) {
             const whatsAppNumber = "8590814673";
@@ -163,10 +209,44 @@ export function CheckoutForm() {
                             </FormItem>
                         )}/>
                         
+                        <FormField
+                            control={form.control}
+                            name="paymentScreenshot"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Payment Screenshot</FormLabel>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="w-full justify-start text-left font-normal text-muted-foreground"
+                                                onClick={() => fileInputRef.current?.click()}
+                                            >
+                                                <Upload className="mr-2 h-4 w-4" />
+                                                {selectedFileName || "Upload screenshot..."}
+                                            </Button>
+                                            <Input
+                                                type="file"
+                                                className="hidden"
+                                                ref={fileInputRef}
+                                                accept="image/*"
+                                                onChange={(e) => {
+                                                    field.onChange(e.target.files);
+                                                    setSelectedFileName(e.target.files?.[0]?.name || null);
+                                                }}
+                                            />
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
                         <div className="space-y-4">
                              <Button onClick={handleWhatsAppPay} className="w-full bg-green-600 hover:bg-green-700 text-white" size="lg" disabled={isSubmitting}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5"><path d="M12.01 2.01a10.02 10.02 0 0 0-8.2 13.43l-1.2 4.38 4.5-1.18A9.95 9.95 0 0 0 12.01 22a10 10 0 0 0 0-20z"/><path d="M17.15 14.36c-.47-.24-2.78-1.37-3.21-1.52s-.76-.23-1.08.23c-.32.47-1.22 1.52-1.49 1.83s-.54.35-1 .12-2.11-.78-4-2.47c-1.48-1.32-2.49-2.95-2.78-3.45s-.3-.76-.07-1c.21-.21.47-.54.71-.81.24-.27.32-.47.47-.78s0-.54-.07-.78-.92-2.2-.92-2.2c-.37-.93-1.08-1.08-1.49-1.08-.32 0-.76.07-1.15.46s-1.49 1.4-1.49 3.45c0 2.05 1.52 4 1.75 4.28s2.95 4.49 7.22 6.32c3.55 1.52 4.26 1.22 4.84.83.58-.39.92-1.37.92-1.37s.24-.24.12-.47z"/></svg>
-                                Pay with WhatsApp
+                                {isSubmitting ? "Processing..." : "Pay with WhatsApp"}
                             </Button>
                         </div>
                     </form>
@@ -175,5 +255,3 @@ export function CheckoutForm() {
         </Card>
     )
 }
-
-    

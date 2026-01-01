@@ -56,7 +56,8 @@
             },
             "required": ["productId", "quantity", "price"]
           }
-        }
+        },
+        "paymentScreenshotUrl": { "type": "string", "format": "uri" }
       },
       "required": ["id", "customerName", "email", "date", "status", "total", "items", "phone", "address"]
     },
