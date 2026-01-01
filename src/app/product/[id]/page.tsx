@@ -1,5 +1,7 @@
+
 "use client";
 
+import { use, useMemo } from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { StarRating } from '@/components/shop/star-rating';
@@ -8,15 +10,18 @@ import { Badge } from '@/components/ui/badge';
 import { AddToCartButton } from '@/components/shop/add-to-cart-button';
 import { CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useFirestore } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirestore, useUser } from '@/firebase';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useDocument } from '@/firebase/firestore/use-doc';
-import type { Product } from '@/lib/types';
-import { use, useMemo } from 'react';
+import type { Product, Review } from '@/lib/types';
+import { ReviewForm } from '@/components/shop/review-form';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
     const { id } = params;
     const firestore = useFirestore();
+    const { user } = useUser();
+    const { toast } = useToast();
 
     const productRef = useMemo(() => {
         if (!firestore) return null;
@@ -24,6 +29,32 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     }, [firestore, id]);
 
     const { data: product, loading } = useDocument<Product>(productRef);
+
+    const handleAddReview = async (reviewData: Omit<Review, 'id' | 'date'>) => {
+        if (!productRef) return;
+
+        const newReview: Review = {
+            id: new Date().getTime().toString(),
+            ...reviewData,
+            date: new Date().toISOString(),
+        };
+
+        try {
+            await updateDoc(productRef, {
+                reviews: arrayUnion(newReview)
+            });
+            toast({
+                title: "Review Submitted",
+                description: "Thank you for your feedback!",
+            });
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Error submitting review",
+                description: error.message || "Could not submit your review.",
+            });
+        }
+    };
 
     if (loading) {
         return <div className="container mx-auto px-4 py-12 text-center">Loading product...</div>;
@@ -102,6 +133,11 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                         <p className="text-muted-foreground">No reviews yet for this product.</p>
                     )}
                 </div>
+
+                <Separator className="my-12" />
+                
+                <ReviewForm onSubmit={handleAddReview} />
+
             </div>
         </div>
     );
