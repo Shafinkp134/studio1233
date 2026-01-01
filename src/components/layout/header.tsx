@@ -2,17 +2,21 @@
 "use client";
 
 import Link from 'next/link';
-import { Package, ShoppingCart, User as UserIcon, LogOut } from 'lucide-react';
+import { Package, ShoppingCart, User as UserIcon, LogOut, Shield } from 'lucide-react';
 import { CartSheet } from '@/components/shop/cart-sheet';
 import { useUser } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { getAuth, signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useRouter } from 'next/navigation';
+
+const ADMIN_EMAIL = "admin@example.com";
 
 export function Header() {
   const { user, loading } = useUser();
   const auth = getAuth();
+  const router = useRouter();
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -49,6 +53,12 @@ export function Header() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {user.email === ADMIN_EMAIL && (
+                    <DropdownMenuItem onClick={() => router.push('/admin')}>
+                      <Shield className="mr-2 h-4 w-4" />
+                      <span>Admin Panel</span>
+                    </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
