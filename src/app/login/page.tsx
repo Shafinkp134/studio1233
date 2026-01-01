@@ -175,7 +175,12 @@ export default function LoginPage() {
                                     <FormItem>
                                         <FormLabel>One-Time Password</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="123456" {...field} />
+                                            <Input 
+                                                placeholder="123456" 
+                                                {...field}
+                                                className="text-center text-2xl tracking-[0.5em] font-mono"
+                                                maxLength={6}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
