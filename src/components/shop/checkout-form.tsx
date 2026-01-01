@@ -18,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/context/cart-context";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -36,6 +37,7 @@ export function CheckoutForm() {
     const { toast } = useToast();
     const { clearCart } = useCart();
     const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -45,14 +47,29 @@ export function CheckoutForm() {
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log("Form submitted:", values);
-        toast({
-            title: "Order Placed!",
-            description: "Thank you for your purchase. A confirmation has been sent to your email.",
-        });
-        clearCart();
-        router.push('/');
+    function placeOrder(paymentMethod: string) {
+        setIsSubmitting(true);
+        console.log(`Placing order with ${paymentMethod}`);
+        
+        // Simulate API call
+        setTimeout(() => {
+            toast({
+                title: "Order Placed!",
+                description: "Thank you for your purchase. A confirmation has been sent to your email.",
+            });
+            clearCart();
+            router.push('/');
+            setIsSubmitting(false);
+        }, 1500);
+    }
+
+    function onCardSubmit(values: z.infer<typeof formSchema>) {
+        console.log("Card details submitted:", values);
+        placeOrder("Credit Card");
+    }
+
+    function onPhonePeSubmit() {
+        placeOrder("PhonePe");
     }
 
     return (
@@ -63,7 +80,7 @@ export function CheckoutForm() {
             </CardHeader>
             <CardContent>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <form onSubmit={form.handleSubmit(onCardSubmit)} className="space-y-8">
                         <div className="space-y-4">
                             <h3 className="text-lg font-medium">Contact Information</h3>
                              <FormField control={form.control} name="email" render={({ field }) => (
@@ -132,9 +149,24 @@ export function CheckoutForm() {
                             </div>
                         </div>
                         
-                        <Button type="submit" className="w-full" size="lg" disabled={form.formState.isSubmitting}>
-                            {form.formState.isSubmitting ? "Processing..." : "Pay Now"}
-                        </Button>
+                        <div className="space-y-4">
+                            <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                                {isSubmitting ? "Processing..." : "Pay with Card"}
+                            </Button>
+
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <span className="w-full border-t" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-background px-2 text-muted-foreground">Or</span>
+                                </div>
+                            </div>
+                            
+                            <Button type="button" variant="outline" className="w-full" size="lg" onClick={onPhonePeSubmit} disabled={isSubmitting}>
+                                {isSubmitting ? "Processing..." : "Pay with PhonePe"}
+                            </Button>
+                        </div>
                     </form>
                 </Form>
             </CardContent>
