@@ -1,45 +1,91 @@
 
 {
   "entities": {
-    "user": {
-      "title": "User",
-      "description": "A user of the application",
+    "product": {
+      "title": "Product",
+      "description": "A product in the store",
       "type": "object",
       "properties": {
-        "uid": {
-          "type": "string",
-          "description": "The user's unique ID"
-        },
-        "email": {
-          "type": "string",
-          "format": "email",
-          "description": "The user's email address"
-        },
-        "displayName": {
-          "type": "string",
-          "description": "The user's display name"
-        },
-        "photoURL": {
-          "type": "string",
-          "format": "uri",
-          "description": "The URL of the user's profile picture"
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "image": { "type": "string" },
+        "brand": { "type": "string" },
+        "type": { "type": "string" },
+        "rating": { "type": "number" },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "reviews": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "author": { "type": "string" },
+              "rating": { "type": "number" },
+              "text": { "type": "string" },
+              "date": { "type": "string", "format": "date" }
+            },
+            "required": ["id", "author", "rating", "text", "date"]
+          }
         }
       },
-      "required": [
-        "uid",
-        "email"
-      ]
+      "required": ["id", "name", "price", "image", "brand", "type"]
+    },
+    "order": {
+      "title": "Order",
+      "description": "A customer order",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["Processing", "Shipped", "Delivered", "Cancelled"] },
+        "total": { "type": "number" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "quantity": { "type": "number" },
+              "price": { "type": "number" }
+            },
+            "required": ["productId", "quantity", "price"]
+          }
+        }
+      },
+      "required": ["id", "customerName", "email", "date", "status", "total", "items", "phone", "address"]
+    },
+    "admin": {
+        "title": "Admin",
+        "description": "An admin user of the application",
+        "type": "object",
+        "properties": {
+          "uid": { "type": "string", "description": "The user's unique ID" },
+          "email": { "type": "string", "format": "email", "description": "The user's email address" }
+        },
+        "required": ["uid", "email"]
     }
   },
   "auth": {
-    "providers": [
-      "email"
-    ]
+    "providers": ["email", "google.com"]
   },
   "firestore": {
     "/users/{userId}": {
-      "schema": "user",
-      "description": "Stores user profile information."
+      "schema": "admin",
+      "description": "Stores admin user profile information."
+    },
+    "/products/{productId}": {
+      "schema": "product",
+      "description": "Stores product information."
+    },
+    "/orders/{orderId}": {
+        "schema": "order",
+        "description": "Stores customer order information."
     }
   }
 }

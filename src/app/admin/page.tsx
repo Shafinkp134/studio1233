@@ -55,10 +55,19 @@ export default function AdminPage() {
   const { data: orders, loading: ordersLoading } = useCollection<Order>(ordersQuery);
 
   useEffect(() => {
-    if (!userLoading && (!user || user.email !== ADMIN_EMAIL)) {
-      router.push("/login");
+    if (!userLoading) {
+      if (!user) {
+        router.push("/login");
+      } else if (user.email !== ADMIN_EMAIL) {
+        toast({
+          variant: "destructive",
+          title: "Unauthorized",
+          description: "You do not have permission to access this page.",
+        });
+        router.push("/");
+      }
     }
-  }, [user, userLoading, router]);
+  }, [user, userLoading, router, toast]);
 
   const handleDeleteProduct = async (productId: string) => {
     if (!firestore) return;
